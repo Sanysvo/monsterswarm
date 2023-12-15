@@ -1,0 +1,32 @@
+modLoader="javafml"
+loaderVersion="[46,)"
+
+license="All Rights Reserved"
+issueTrackerURL="https://github.com/MinecraftForge/MinecraftForge/issues"
+showAsResourcePack=false
+
+[[mods]]
+modId="monsterswarm"
+version="2.0.3"
+displayName="Monster Swarm"
+updateJSONURL="https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
+displayURL="https://minecraftforge.net"
+logoFile="logo.png"
+credits="@Barseg"
+authors="Barseg (Sanysvo)"
+description='Мод, усложняющий игру. Увеличивает колличество монстров в игре и заставляет их на вас охотится в радиусе 64 метров'
+displayTest="MATCH_VERSION"
+
+[[dependencies.monsterswarm]]
+modId="forge"
+mandatory=true
+versionRange="[46,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.monsterswarm]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"

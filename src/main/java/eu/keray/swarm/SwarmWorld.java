@@ -43,72 +43,73 @@ public class SwarmWorld {
 	int ticks = 0;
 
 	public void run() {
-		ticks++;
-		if (index >= attackers.size()) {
 
-			if (ticks < 10)
-				return;
-			ticks = 0;
-
-			if(!world.dimensionType().hasFixedTime()) {
-				long seconds = world.getDayTime() % 24000;
-				if(seconds > 2000 && seconds < 10000) {
-					cancelTarget();
-					attackers.clear();
-					targets.clear();
-					index = 0;
-					return;
-				}
-			}
-
-			index = 0;
+		if(index >= attackers.size()) {
 			collectEntities();
-			digg.update();
-			// Log.log("Collected " + attackers.size() + " and " + targets.size());
-			return;
+			index = 0;
 		}
 
+		boolean allowSwarmByDay = true;
 
 
-		int top = Math.min(index + 2, attackers.size());
+		if(!world.dimensionType().hasFixedTime()) {
+			long seconds = world.getDayTime() % 24000;
+			if(seconds > 2000 && seconds < 10000) {
+				allowSwarmByDay = false;
+			}
+		}
 
-		for (; index < top; index++) {
+		int limit = attackers.size() - index > 10 ? index + 10 : attackers.size();
+
+		for (;index < limit; index++) {
 			Monster monster = attackers.get(index);
 
 			LivingEntity target = findTargetFor(monster, 64);
+
 			if (target == null) {
 				continue;
 			}
 
-			setTarget(monster, target);
-
-			Vec3i point = Maths.findPointTowards(monster, target, 15);
-			
-			
-			boolean canDigg = false;
-			
-			if(isOverworld) {
-				canDigg = monster.getX() < 40 && target.getY() < 40;
+			if(MainConfig.UNDERGROUND.get() && target.getOnPos().getY() < 40) {
+				setTarget(monster, target);
+				continue;
 			}
 
-			if (canDigg && (monster instanceof Zombie || monster instanceof AbstractSkeleton)) {
-				digg.process(monster, target);
+			if(allowSwarmByDay) {
+				setTarget(monster, target);
 			}
 
-			double speed = 1;
-
-			if(target.isSprinting() && MainConfig.ENABLE_SPRINTING.get()){
-				speed = 2.3;
-			}
-
-			monster.getNavigation().moveTo(point.getX() + 0.5, point.getY() + 0.5, point.getZ() + 0.5, speed);
 		}
+
 	}
 
 	private void setTarget(Monster monster, LivingEntity target) {
-		monster.setTarget(target);
+
+		Vec3i point = Maths.findPointTowards(monster, target, 15);
+
+		boolean canDigg = false;
+
+		if(isOverworld) {
+			canDigg = monster.getX() < 40 && target.getY() < 40;
+		}
+
+		if (canDigg && (monster instanceof Zombie || monster instanceof AbstractSkeleton)) {
+			digg.process(monster, target);
+		}
+
+		double speed = 1;
+
+		if(target.isSprinting() && MainConfig.ENABLE_SPRINTING.get()){
+			speed = 2.3;
+		}
+
+		monster.getNavigation().moveTo(point.getX() + 0.5, point.getY() + 0.5, point.getZ() + 0.5, speed);
 	}
 
+	/**
+	 * Снимает агру с переданного существа
+	 * @param target
+	 */
 	public void cancelTarget(LivingEntity target) {
 		for(Monster monster : attackers) {
 			if(monster.getTarget() != null && monster.getTarget() == target) {
@@ -117,11 +118,23 @@ public class SwarmWorld {
 		}
 	}
 
+	/**
+	 * Снимает агру со всех существ
+	 */
 	public void cancelTarget() {
 		for(Monster monster : attackers) {
 			monster.setTarget(null);
 		}
 	}
+
+	/**
+	 * Снимает таргет с переданного монстра
+	 */
+	public void cancelTarget(Monster monster) {
+		monster.setTarget(null);
+	}
+
+
 
 	public LivingEntity findTargetFor(Mob attacker, int radius) {
 

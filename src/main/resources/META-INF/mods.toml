@@ -7,7 +7,7 @@ showAsResourcePack=false
 
 [[mods]]
 modId="monsterswarm"
-version="2.0.3"
+version="2.0.4"
 displayName="Monster Swarm"
 updateJSONURL="https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json"
 displayURL="https://minecraftforge.net"
